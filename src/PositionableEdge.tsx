@@ -7,8 +7,50 @@ import {
   getStraightPath,
   useReactFlow,
 } from "reactflow";
+interface ClickableBaseEdgeProps {
+  id: string;
+  path: string;
+  style?: React.CSSProperties;
+  markerEnd?: string;
+  markerStart?: string;
+  interactionWidth?: number;
+  onClick?: (event: React.MouseEvent<SVGPathElement, MouseEvent>) => void;
+}
 
-import ClickableBaseEdge from "./ClickableBaseEdge";
+const ClickableBaseEdge: React.FC<ClickableBaseEdgeProps> = ({
+  id,
+  path,
+  style,
+  markerEnd,
+  markerStart,
+  interactionWidth = 20,
+  onClick,
+}) => {
+  return (
+    <>
+      <path
+        id={id}
+        style={style}
+        d={path}
+        fill="none"
+        className="react-flow__edge-path"
+        markerEnd={markerEnd}
+        markerStart={markerStart}
+      />
+      {interactionWidth && (
+        <path
+          d={path}
+          fill="none"
+          strokeOpacity={0}
+          strokeWidth={interactionWidth}
+          className="react-flow__edge-interaction"
+          onClick={onClick}
+        />
+      )}
+    </>
+  );
+};
+
 import "./PositionableEdge.css";
 
 export default function PositionableEdge({
@@ -42,7 +84,6 @@ export default function PositionableEdge({
       pathFunction = getBezierPath;
   }
 
-  // calculate the origin and destination of all the segments
   for (let i = 0; i < edgeSegmentsCount; i++) {
     let segmentSourceX, segmentSourceY, segmentTargetX, segmentTargetY;
 
@@ -77,7 +118,7 @@ export default function PositionableEdge({
 
   return (
     <>
-      {edgeSegmentsArray.map(({ edgePath, labelX, labelY }, index) => (
+      {edgeSegmentsArray.map(({ edgePath }, index) => (
         <ClickableBaseEdge
           id={`${id}_segment${index}`}
           onClick={(event: React.MouseEvent<SVGPathElement, MouseEvent>) => {
@@ -119,9 +160,7 @@ export default function PositionableEdge({
                   `${active ?? -1}` !== "-1" ? "active" : ""
                 }`}
                 data-active={active ?? -1}
-                // mouse move is used to move the handler when its been mousedowned on
                 onMouseMove={(event: React.MouseEvent) => {
-                  // Cast event.target to HTMLElement to access dataset
                   const target = event.target as HTMLElement;
 
                   const activeEdge = parseInt(target.dataset.active ?? "-1", 10);
@@ -133,7 +172,7 @@ export default function PositionableEdge({
                     y: event.clientY,
                   });
                   reactFlowInstance.setEdges((edges) => {
-                    edges[activeEdge].id = Math.random().toString(); // Convert number to string
+                    edges[activeEdge].id = Math.random().toString();
                     edges[activeEdge].data.positionHandlers[handlerIndex] = {
                       x: position.x,
                       y: position.y,
@@ -143,10 +182,8 @@ export default function PositionableEdge({
                   });
 
                 }}
-                // mouse up is used to release all the handlers
                 onMouseUp={() => {
                   reactFlowInstance.setEdges((edges) => {
-                    // const edgeIndex = edges.findIndex((edge) => edge.id === id);
                     for (let i = 0; i < edges.length; i++) {
                       const handlersLength =
                         edges[i].data.positionHandlers.length;
@@ -162,7 +199,6 @@ export default function PositionableEdge({
                 <button
                   className="positionHandler"
                   data-active={active ?? -1}
-                  // mouse down is used to activate the handler
                   onMouseDown={() => {
                     reactFlowInstance.setEdges((edges) => {
                       const edgeIndex = edges.findIndex(
@@ -174,7 +210,6 @@ export default function PositionableEdge({
                       return edges;
                     });
                   }}
-                  // right click is used to delete the handler
                   onContextMenu={(event: React.MouseEvent) => {
                     event.preventDefault();
                     reactFlowInstance.setEdges((edges) => {

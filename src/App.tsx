@@ -1,16 +1,13 @@
-import React, { useCallback, useState } from "react";
+import { useCallback } from "react";
 import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
-  MiniMap,
   Controls,
   Background,
   Node,
   Edge,
-  Position,
   ConnectionMode,
-  MarkerType,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -18,7 +15,6 @@ import PositionableEdge from "./PositionableEdge";
 
 const EdgesFlow = () => {
   const initialNodes: Node[] = [
-    // Smooth step
     {
       id: "SmoothStepA",
       type: "input",
@@ -30,19 +26,6 @@ const EdgesFlow = () => {
       type: "output",
       data: { label: "SmoothStepB" },
       position: { x: 125, y: 200 },
-    },
-    // bezier
-    {
-      id: "BezierA",
-      type: "input",
-      data: { label: "BezierA" },
-      position: { x: 325, y: 0 },
-    },
-    {
-      id: "BezierB",
-      type: "output",
-      data: { label: "BezierB" },
-      position: { x: 325, y: 200 },
     },
   ];
 
@@ -61,25 +44,6 @@ const EdgesFlow = () => {
           },
           {
             x: 250.0,
-            y: 150.0,
-          },
-        ],
-      },
-    },
-    {
-      id: "BezierEdge",
-      source: "BezierA",
-      target: "BezierB",
-      type: "positionableedge",
-      data: {
-        type: "default",
-        positionHandlers: [
-          {
-            x: 350.0,
-            y: 100.0,
-          },
-          {
-            x: 450.0,
             y: 150.0,
           },
         ],
