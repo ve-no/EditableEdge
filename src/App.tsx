@@ -1,24 +1,25 @@
 import { useCallback } from "react";
-import ReactFlow, {
+import {
   useNodesState,
   useEdgesState,
-  addEdge,
+  ReactFlow,
   Controls,
   Background,
   Node,
   Edge,
   ConnectionMode,
-} from "reactflow";
-import "reactflow/dist/style.css";
-
+  addEdge,
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 import PositionableEdge from "./PositionableEdge";
 
-const EdgesFlow = () => {
+const App = () => {
   const initialNodes: Node[] = [
+    // Smooth step
     {
       id: "SmoothStepA",
       type: "input",
-      data: { label: "SmoothStepA" },
+      data: { label: "SmoothStep" },
       position: { x: 125, y: 0 },
     },
     {
@@ -84,4 +85,5 @@ const EdgesFlow = () => {
   );
 };
 
-export default EdgesFlow;
+export default App;
+
