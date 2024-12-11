@@ -79,7 +79,8 @@ export default function PositionableEdge({
     <>
       {edgeSegmentsArray.map(({ edgePath, labelX, labelY }, index) => (
         <ClickableBaseEdge
-          onClick={(event) => {
+          id={`${id}_segment${index}`}
+          onClick={(event: React.MouseEvent<SVGPathElement, MouseEvent>) => {
             const position = reactFlowInstance.screenToFlowPosition({
               x: event.clientX,
               y: event.clientY,
@@ -101,86 +102,99 @@ export default function PositionableEdge({
           style={style}
         />
       ))}
-      {positionHandlers.map(({ x, y, active }, handlerIndex) => (
-        <EdgeLabelRenderer key={`edge${id}_handler${handlerIndex}`}>
-          <div
-            className="nopan positionHandlerContainer"
-            style={{
-              transform: `translate(-50%, -50%) translate(${x}px,${y}px)`,
-            }}
-          >
+      {positionHandlers.map(
+        (
+          { x, y, active }: { x: number; y: number; active?: number },
+          handlerIndex: number
+        ) => (
+          <EdgeLabelRenderer key={`edge${id}_handler${handlerIndex}`}>
             <div
-              className={`positionHandlerEventContainer ${active} ${
-                `${active ?? -1}` !== "-1" ? "active" : ""
-              }`}
-              data-active={active ?? -1}
-              // mouse move is used to move the handler when its been mousedowned on
-              onMouseMove={(event) => {
-                let activeEdge = parseInt(event.target.dataset.active ?? -1);
-                if (activeEdge === -1) {
-                  return;
-                }
-                const position = reactFlowInstance.screenToFlowPosition({
-                  x: event.clientX,
-                  y: event.clientY,
-                });
-                reactFlowInstance.setEdges((edges) => {
-                  edges[activeEdge].id = Math.random();
-                  edges[activeEdge].data.positionHandlers[handlerIndex] = {
-                    x: position.x,
-                    y: position.y,
-                    active: activeEdge,
-                  };
-                  return edges;
-                });
-              }}
-              // mouse up is used to release all the handlers
-              onMouseUp={() => {
-                reactFlowInstance.setEdges((edges) => {
-                  // const edgeIndex = edges.findIndex((edge) => edge.id === id);
-                  for (let i = 0; i < edges.length; i++) {
-                    const handlersLength =
-                      edges[i].data.positionHandlers.length;
-                    for (let j = 0; j < handlersLength; j++) {
-                      edges[i].data.positionHandlers[j].active = -1;
-                    }
-                  }
-
-                  return edges;
-                });
+              className="nopan positionHandlerContainer"
+              style={{
+                transform: `translate(-50%, -50%) translate(${x}px,${y}px)`,
               }}
             >
-              <button
-                className="positionHandler"
+              <div
+                className={`positionHandlerEventContainer ${active} ${
+                  `${active ?? -1}` !== "-1" ? "active" : ""
+                }`}
                 data-active={active ?? -1}
-                // mouse down is used to activate the handler
-                onMouseDown={() => {
+                // mouse move is used to move the handler when its been mousedowned on
+                onMouseMove={(event: React.MouseEvent) => {
+                  // Cast event.target to HTMLElement to access dataset
+                  const target = event.target as HTMLElement;
+
+                  const activeEdge = parseInt(target.dataset.active ?? "-1", 10);
+                  if (activeEdge === -1) {
+                    return;
+                  }
+                  const position = reactFlowInstance.screenToFlowPosition({
+                    x: event.clientX,
+                    y: event.clientY,
+                  });
                   reactFlowInstance.setEdges((edges) => {
-                    const edgeIndex = edges.findIndex((edge) => edge.id === id);
-                    edges[edgeIndex].data.positionHandlers[
-                      handlerIndex
-                    ].active = edgeIndex;
+                    edges[activeEdge].id = Math.random().toString(); // Convert number to string
+                    edges[activeEdge].data.positionHandlers[handlerIndex] = {
+                      x: position.x,
+                      y: position.y,
+                      active: activeEdge,
+                    };
+                    return edges;
+                  });
+
+                }}
+                // mouse up is used to release all the handlers
+                onMouseUp={() => {
+                  reactFlowInstance.setEdges((edges) => {
+                    // const edgeIndex = edges.findIndex((edge) => edge.id === id);
+                    for (let i = 0; i < edges.length; i++) {
+                      const handlersLength =
+                        edges[i].data.positionHandlers.length;
+                      for (let j = 0; j < handlersLength; j++) {
+                        edges[i].data.positionHandlers[j].active = -1;
+                      }
+                    }
+
                     return edges;
                   });
                 }}
-                // right click is used to delete the handler
-                onContextMenu={(event) => {
-                  event.preventDefault();
-                  reactFlowInstance.setEdges((edges) => {
-                    const edgeIndex = edges.findIndex((edge) => edge.id === id);
-                    edges[edgeIndex].id = Math.random();
-                    edges[edgeIndex].data.positionHandlers.splice(
-                      handlerIndex,
-                      1
-                    );
-                    return edges;
-                  });
-                }}
-              ></button>
+              >
+                <button
+                  className="positionHandler"
+                  data-active={active ?? -1}
+                  // mouse down is used to activate the handler
+                  onMouseDown={() => {
+                    reactFlowInstance.setEdges((edges) => {
+                      const edgeIndex = edges.findIndex(
+                        (edge) => edge.id === id
+                      );
+                      edges[edgeIndex].data.positionHandlers[
+                        handlerIndex
+                      ].active = edgeIndex;
+                      return edges;
+                    });
+                  }}
+                  // right click is used to delete the handler
+                  onContextMenu={(event: React.MouseEvent) => {
+                    event.preventDefault();
+                    reactFlowInstance.setEdges((edges) => {
+                      const edgeIndex = edges.findIndex(
+                        (edge) => edge.id === id
+                      );
+                      edges[edgeIndex].id = Math.random().toString();
+                      edges[edgeIndex].data.positionHandlers.splice(
+                        handlerIndex,
+                        1
+                      );
+                      return edges;
+                    });
+                  }}
+                ></button>
+              </div>
             </div>
-          </div>
-        </EdgeLabelRenderer>
-      ))}
+          </EdgeLabelRenderer>
+        )
+      )}
     </>
   );
 }

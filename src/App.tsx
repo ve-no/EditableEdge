@@ -96,7 +96,7 @@ const EdgesFlow = () => {
   const nodeTypes = {};
 
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
+    (params: any) => setEdges((eds) => addEdge(params, eds)),
     []
   );
 

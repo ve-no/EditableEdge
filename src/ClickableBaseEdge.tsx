@@ -1,6 +1,16 @@
 import React from "react";
 
-const ClickableBaseEdge = ({
+interface ClickableBaseEdgeProps {
+  id: string;
+  path: string;
+  style?: React.CSSProperties;
+  markerEnd?: string;
+  markerStart?: string;
+  interactionWidth?: number;
+  onClick?: (event: React.MouseEvent<SVGPathElement, MouseEvent>) => void;
+}
+
+const ClickableBaseEdge: React.FC<ClickableBaseEdgeProps> = ({
   id,
   path,
   style,
@@ -27,13 +37,11 @@ const ClickableBaseEdge = ({
           strokeOpacity={0}
           strokeWidth={interactionWidth}
           className="react-flow__edge-interaction"
-          onClick={onClick}
+          onClick={onClick} // Pass the event handler
         />
       )}
     </>
   );
 };
-
-ClickableBaseEdge.displayName = "BaseEdge";
 
 export default ClickableBaseEdge;
