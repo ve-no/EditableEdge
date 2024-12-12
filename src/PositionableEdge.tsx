@@ -23,7 +23,6 @@ interface CustomEdgeProps extends EdgeProps {
   data?: CustomEdgeData;
 }
 
-
 export default function PositionableEdge({
   id,
   sourceX,
@@ -38,17 +37,20 @@ export default function PositionableEdge({
 }: CustomEdgeProps) {
   const reactFlowInstance = useReactFlow();
   const positionHandlers: PositionHandler[] = data?.positionHandlers || [];
-  const type = data?.type || "default";
+  const edgeType = data?.type || "straight";
   const edgeSegmentsCount = positionHandlers.length + 1;
 
-  const pathFunction =
-    type === "straight"
-      ? getStraightPath
-      : type === "smoothstep"
-      ? getSmoothStepPath
-      : getBezierPath;
+  const getPathFunction = () => {
+    switch (edgeType) {
+      case "straight":
+        return getStraightPath;
+      case "smoothstep":
+        return getSmoothStepPath;
+      default:
+        return getBezierPath;
+    }
+  };
 
-  // Generate edge segments with custom handlers
   const edgeSegmentsArray = Array.from({ length: edgeSegmentsCount }).map(
     (_, i) => {
       const segmentSourceX =
@@ -64,7 +66,7 @@ export default function PositionableEdge({
           ? targetY
           : positionHandlers[i]?.y ?? targetY;
 
-      const [edgePath, labelX, labelY] = pathFunction({
+      const [edgePath, labelX, labelY] = getPathFunction()({
         sourceX: segmentSourceX,
         sourceY: segmentSourceY,
         sourcePosition,
@@ -79,7 +81,7 @@ export default function PositionableEdge({
 
   const updateHandlerPosition = (
     handlerIndex: number,
-    newPosition: { x: number; y: number }
+    newPosition: PositionHandler
   ) => {
     reactFlowInstance.setEdges((edges) =>
       edges.map((edge) => {
@@ -102,6 +104,30 @@ export default function PositionableEdge({
     );
   };
 
+  const addHandlerIfNotNearby = (index: number, position: PositionHandler) => {
+    const threshold = 10;
+
+    reactFlowInstance.setEdges((edges) =>
+      edges.map((edge) => {
+        if (edge.id === id && Array.isArray(edge.data?.positionHandlers)) {
+          const handlers = edge.data.positionHandlers;
+          const isPointNearby = handlers.some(
+            (handler) =>
+              Math.sqrt(
+                Math.pow(handler.x - position.x, 2) +
+                  Math.pow(handler.y - position.y, 2)
+              ) <= threshold
+          );
+
+          if (!isPointNearby) {
+            handlers.splice(index, 0, position);
+          }
+        }
+        return edge;
+      })
+    );
+  };
+
   return (
     <>
       {edgeSegmentsArray.map(({ edgePath }, index) => (
@@ -111,6 +137,13 @@ export default function PositionableEdge({
           path={edgePath}
           style={style}
           markerEnd={markerEnd}
+          onClick={(event) => {
+            const position = reactFlowInstance.screenToFlowPosition({
+              x: event.clientX,
+              y: event.clientY,
+            });
+            addHandlerIfNotNearby(index, position);
+          }}
         />
       ))}
       {positionHandlers.map(({ x, y }, handlerIndex) => (
@@ -123,10 +156,6 @@ export default function PositionableEdge({
           >
             <div
               className="positionHandler"
-              draggable
-              onDragStart={(event) => {
-                event.preventDefault();
-              }}
               onMouseDown={(event) => {
                 const onMouseMove = (moveEvent: MouseEvent) => {
                   const newPosition = reactFlowInstance.screenToFlowPosition({
@@ -135,7 +164,6 @@ export default function PositionableEdge({
                   });
                   updateHandlerPosition(handlerIndex, newPosition);
                 };
-
                 const onMouseUp = () => {
                   document.removeEventListener("mousemove", onMouseMove);
                   document.removeEventListener("mouseup", onMouseUp);
