@@ -5,7 +5,6 @@ const test = () => {
 }
 
 export default test;
-// import React, { useCallback } from "react";
 // import {
 //   EdgeLabelRenderer,
 //   EdgeProps,
@@ -13,53 +12,9 @@ export default test;
 //   getBezierPath,
 //   getStraightPath,
 //   getSmoothStepPath,
-//   Edge,
 // } from "@xyflow/react";
-// import "./PositionableEdge.css"
-// interface ClickableBaseEdgeProps {
-//   id: string;
-//   path: string;
-//   style?: React.CSSProperties;
-//   markerEnd?: string;
-//   markerStart?: string;
-//   interactionWidth?: number;
-//   onClick?: (event: React.MouseEvent<SVGPathElement, MouseEvent>) => void;
-// }
-
-// const ClickableBaseEdge: React.FC<ClickableBaseEdgeProps> = ({
-//   id,
-//   path,
-//   style,
-//   markerEnd,
-//   markerStart,
-//   interactionWidth = 20,
-//   onClick,
-// }) => {
-//   return (
-//     <>
-//       <path
-//         id={id}
-//         style={style}
-//         d={path}
-//         fill="none"
-//         className="react-flow__edge-path"
-//         markerEnd={markerEnd}
-//         markerStart={markerStart}
-//       />
-//       {interactionWidth && (
-//         <path
-//           d={path}
-//           fill="none"
-//           strokeOpacity={0}
-//           strokeWidth={interactionWidth}
-//           className="react-flow__edge-interaction"
-//           onClick={onClick}
-//         />
-//       )}
-//     </>
-//   );
-// };
-
+// import "./PositionableEdge.css";
+// import ClickableBaseEdge from "./ClickableBaseEdge";
 // type PositionHandler = {
 //   x: number;
 //   y: number;
@@ -133,13 +88,6 @@ export default test;
 //     edgeSegmentsArray.push({ edgePath, labelX, labelY });
 //   }
 
-//   const updateEdges = useCallback(
-//     (updater: (edges: Edge[]) => Edge[]) => {
-//       reactFlowInstance.setEdges((prevEdges) => updater([...prevEdges]));
-//     },
-//     [reactFlowInstance]
-//   );
-
 //   return (
 //     <>
 //       {edgeSegmentsArray.map(({ edgePath }, index) => (
@@ -150,14 +98,15 @@ export default test;
 //               x: event.clientX,
 //               y: event.clientY,
 //             });
-
-//             updateEdges((edges) => {
+//             reactFlowInstance.setEdges((edges) => {
 //               const edgeIndex = edges.findIndex((edge) => edge.id === id);
-//               if (edgeIndex !== -1) {
-//                 const handlers = edges[edgeIndex]?.data?.positionHandlers;
-//                 if (Array.isArray(handlers)) {
-//                   handlers.splice(index, 0, { x: position.x, y: position.y });
-//                 }
+//               if (Array.isArray(edges)) {
+//                 // edges[edgeIndex].id = Math.random().toString();
+//                 if (Array.isArray(edges[edgeIndex]?.data?.positionHandlers))
+//                   edges[edgeIndex].data.positionHandlers.splice(index, 0, {
+//                     x: position.x,
+//                     y: position.y,
+//                   });
 //               }
 //               return edges;
 //             });
@@ -180,68 +129,132 @@ export default test;
 //               className={`positionHandlerEventContainer ${
 //                 active !== undefined ? "active" : ""
 //               }`}
-//               data-active={active ?? -1}
+//               tabIndex={active ?? -1}
+//               // onMouseMove={(event) => {
+
+//               //   const target = event.target as HTMLElement;
+//               //   const activeEdge = parseInt(target.dataset.active ?? "-1", 10);
+//               //   if (activeEdge === -1) return;
+
+//               //   const position = reactFlowInstance.screenToFlowPosition({
+//               //     x: event.clientX,
+//               //     y: event.clientY,
+//               //   });
+//               //   reactFlowInstance.setEdges((edges) => {
+//               //     const edge = edges[activeEdge];
+//               //     if (Array.isArray(edge?.data?.positionHandlers)) {
+//               //       edge.id = Math.random().toString();
+//               //       edge.data.positionHandlers[handlerIndex] = {
+//               //         x: position.x,
+//               //         y: position.y,
+//               //         active: activeEdge,
+//               //       };
+//               //     }
+//               //     return edges;
+//               //   });
+//               // }}
 //               onMouseMove={(event) => {
 //                 const target = event.target as HTMLElement;
 //                 const activeEdge = parseInt(target.dataset.active ?? "-1", 10);
 //                 if (activeEdge === -1) return;
 
 //                 const position = reactFlowInstance.screenToFlowPosition({
-//                   x: event.clientX,
-//                   y: event.clientY,
+//                     x: event.clientX,
+//                     y: event.clientY,
 //                 });
 
-//                 updateEdges((edges) => {
-//                   const edge = edges[activeEdge];
-//                   if (Array.isArray(edge?.data?.positionHandlers)) {
-//                     edge.id = Math.random().toString();
-//                     edge.data.positionHandlers[handlerIndex] = {
-//                       x: position.x,
-//                       y: position.y,
-//                       active: activeEdge,
-//                     };
-//                   }
-//                   return edges;
-//                 });
-//               }}
-//               onMouseUp={() => {
-//                 updateEdges((edges) => {
-//                   edges.forEach((edge) => {
-//                     const handlers = edge.data?.positionHandlers;
-//                     if (Array.isArray(handlers)) {
-//                       handlers.forEach((handler) => {
-//                         if (handler) handler.active = -1;
-//                       });
+//                 console.log("Moving handler", { handlerIndex, position });
+
+//                 reactFlowInstance.setEdges((edges) => {
+//                     const edge = edges[activeEdge];
+//                     if (Array.isArray(edge?.data?.positionHandlers)) {
+//                         edge.data.positionHandlers[handlerIndex] = {
+//                             x: position.x,
+//                             y: position.y,
+//                             active: activeEdge,
+//                         };
+//                         edge.id = `${id}-updated-${Date.now()}`; // Force re-render
 //                     }
-//                   });
-//                   return edges;
+//                     return [...edges]; // Return new array reference
 //                 });
-//               }}
+//             }}
+
+
+//               // onMouseUp={() => {
+//               //   reactFlowInstance.setEdges((edges) => {
+//               //     // const edgeIndex = edges.findIndex((edge) => edge.id === id);
+//               //     for (let i = 0; i < edges.length; i++) {
+//               //       const handlers = edges[i].data?.positionHandlers;
+//               //       if (Array.isArray(handlers)) {
+//               //         const handlersLength = handlers.length;
+//               //         for (let j = 0; j < handlersLength; j++) {
+//               //           handlers[j].active = -1;
+//               //         }
+//               //       }
+//               //     }
+
+//               //     return edges;
+//               //   });
+//               // }}
+//               onMouseUp={() => {
+//                 reactFlowInstance.setEdges((edges) =>
+//                     edges.map((edge) => {
+//                         if (Array.isArray(edge.data?.positionHandlers)) {
+//                             edge.data.positionHandlers = edge.data.positionHandlers.map((handler) => ({
+//                                 ...handler,
+//                                 active: undefined,
+//                             }));
+//                         }
+//                         return edge;
+//                     })
+//                 );
+//             }}
+
 //             >
-//               <div
+//               <button
 //                 className="positionHandler"
 //                 data-active={active ?? -1}
 //                 onMouseDown={() => {
-//                   updateEdges((edges) => {
-//                     const edge = edges.find((e) => e.id === id);
-//                     if (Array.isArray(edge?.data?.positionHandlers)) {
-//                       edge.data.positionHandlers[handlerIndex].active =
-//                         handlerIndex;
-//                     }
-//                     return edges;
+//                   reactFlowInstance.setEdges((edges) => {
+//                       return edges.map((edge) => {
+//                           if (edge.id === id && Array.isArray(edge.data?.positionHandlers)) {
+//                               edge.data.positionHandlers[handlerIndex].active = handlerIndex;
+//                           }
+//                           return edge;
+//                       });
 //                   });
-//                 }}
+//               }}
+
+//                 // onContextMenu={(event) => {
+//                 //   event.preventDefault();
+//                 //   reactFlowInstance.setEdges((edges) => {
+//                 //     const edgeIndex = edges.findIndex((edge) => edge.id === id);
+//                 //     edges[edgeIndex].id = Math.random().toString();
+//                 //     if (
+//                 //       Array.isArray(edges[edgeIndex].data?.positionHandlers)
+//                 //     ) {
+//                 //       edges[edgeIndex].data.positionHandlers.splice(
+//                 //         handlerIndex,
+//                 //         1
+//                 //       );
+//                 //     }
+//                 //     return edges;
+//                 //   });
+//                 // }}
 //                 onContextMenu={(event) => {
 //                   event.preventDefault();
-//                   updateEdges((edges) => {
-//                     const edge = edges.find((e) => e.id === id);
-//                     if (Array.isArray(edge?.data?.positionHandlers)) {
-//                       edge.data.positionHandlers.splice(handlerIndex, 1);
-//                     }
-//                     return edges;
+//                   reactFlowInstance.setEdges((edges) => {
+//                     return edges.map((edge) => {
+//                       if (edge.id === id && Array.isArray(edge.data?.positionHandlers)) {
+//                         edge.data.positionHandlers = edge.data.positionHandlers.filter(
+//                           (_, idx) => idx !== handlerIndex
+//                         );
+//                       }
+//                       return edge;
+//                     });
 //                   });
-//                 }}
-//               ></div>
+//               }}
+//               ></button>
 //             </div>
 //           </div>
 //         </EdgeLabelRenderer>

@@ -33,3 +33,15 @@
 .positionHandler:hover {
   box-shadow: 0 0 6px 2px rgba(0, 0, 0, 0.08);
 }
+
+.positionHandlerContainer {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: red;
+  cursor: grab;
+}
+.positionHandlerContainer.active {
+  cursor: grabbing;
+}
+
