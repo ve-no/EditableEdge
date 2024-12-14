@@ -1,0 +1,26 @@
+.positionHandlerContainer {
+  position: absolute;
+  font-size: 0;
+  pointer-events: all;
+}
+
+.positionHandler {
+  width: 2px;
+  height: 2px;
+  background: #fff319;
+  border: 1px solid #424014;
+  cursor:crosshair ;
+  border-radius: 50%;
+  margin: 0;
+  padding: 0;
+}
+
+.positionHandler:hover {
+  box-shadow: 0 0 6px 2px rgba(0, 0, 0, 0.08);
+  width: 5px;
+  height: 5px;
+}
+
+.positionHandlerContainer.active {
+  cursor: grabbing;
+}
